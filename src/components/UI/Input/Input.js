@@ -6,7 +6,7 @@ function isInvalid({ valid, touched, shouldValidate }) {
 };
 
 const Input = props => {
-
+	//console.log(props)
 	const inputType = props.type || 'text'
 	const cls = [classes.Input]
 	const htmlFor = `${inputType}-${Math.round(Math.random() * 100)}`

@@ -1,3 +1,26 @@
 .QuizCreator {
-	color: dodgerblue;
+	color: #ffffff;
+	display: flex;
+	padding-top: 30px;
+	justify-content: center;
+	width: 100%;
+	flex-grow: 1;
+	background: linear-gradient(to right, #fc354c, #0abfbc);
+}
+
+.QuizCreator>div {
+	width: 100%;
+	max-width: 600px;
+	padding: 0 20px;
+}
+
+.QuizCreator h1 {
+	text-align: center;
+}
+
+.QuizCreator form {
+	border-radius: 6px;
+	padding: 15px;
+	box-shadow: 2px 2px 2px rgba(0, 0, 0, .5);
+	background: linear-gradient(to right, #ff4b1f, #1fddff);
 }
