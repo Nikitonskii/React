@@ -3,6 +3,8 @@ import React, { Component } from 'react';
 import classes from './Quiz.module.css';
 import ActiveQuiz from '../../components/ActiveQuiz/ActiveQuiz'
 import FinishedQuiz from '../../components/FinishedQuiz/FinishedQuiz';
+import axios from '../../axios/axios-quiz';
+import Loader from '../../components/UI/Loader/Loader';
 
 class Quiz extends Component {
 
@@ -11,30 +13,8 @@ class Quiz extends Component {
 		isFinished: false,
 		activeQuestion: 0,
 		answerState: null, // { [id] : 'success'  'error'}
-		quiz: [
-			{
-				question: 'What color is the sky?',
-				rightAnswer: 3,
-				id: 1,
-				answers: [
-					{ text: 'Red', id: 1 },
-					{ text: 'Orange', id: 2 },
-					{ text: 'Blue', id: 3 },
-					{ text: 'Yellow', id: 4 }
-				]
-			},
-			{
-				question: 'What`s your life like?',
-				rightAnswer: 4,
-				id: 2,
-				answers: [
-					{ text: 'Cool', id: 1 },
-					{ text: 'Bad', id: 2 },
-					{ text: 'Amazing', id: 3 },
-					{ text: 'Shit', id: 4 }
-				]
-			}
-		]
+		quiz: [],
+		loading: true,
 	}
 
 	onAnswerClickHandler = (answerId) => {
@@ -45,13 +25,11 @@ class Quiz extends Component {
 				return
 			}
 		}
-		//console.log(`Answer id : ${answerId}`)
+
 		const question = this.state.quiz[this.state.activeQuestion];
 		const results = this.state.results;
-		console.log(question)
-		console.log(results)
 
-		if (question.rightAnswer === answerId) {
+		if (question.rightAnswerId === answerId) {
 			if (!results[question.id]) {
 				results[question.id] = 'success'
 			}
@@ -82,11 +60,21 @@ class Quiz extends Component {
 				results
 			})
 		}
-
 	}
 
-	componentDidMount() {
-		console.log(this.props.match.params.id)
+	async componentDidMount() {
+		try {
+			const response = await axios.get(`quizes/${this.props.match.params.id}.json`)
+			const quiz = response.data
+			console.log(quiz.righrAnswerId)
+
+			this.setState({
+				quiz,
+				loading: false
+			})
+		} catch (e) {
+			console.log(e)
+		}
 	}
 
 	retryHandler() {
@@ -108,8 +96,10 @@ class Quiz extends Component {
 		return (
 			<div className={classes.Quiz}>
 				<h1>You should answer to each question</h1>
-				{
-					this.state.isFinished
+
+				{ this.state.loading
+					? <Loader />
+					: this.state.isFinished
 						? <FinishedQuiz
 							results={this.state.results}
 							quiz={this.state.quiz}

@@ -35,7 +35,7 @@ const FinishedQuiz = props => {
 			<p>Correct {successCount} of {props.quiz.length}</p>
 
 			<div>
-				<Button type="primary" onRetry={props.reTry}> Try again</Button>
+				<Button type="primary" onClick={props.reTry}> Try again</Button>
 				<Link to='/'>
 					<Button type="success"> Back to the testlist</Button>
 				</Link>

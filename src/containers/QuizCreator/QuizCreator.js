@@ -5,6 +5,7 @@ import Select from '../../components/UI/Select/Select';
 import { createControl, validate, validateForm } from '../../form/formFramework';
 import Input from '../../components/UI/Input/Input';
 import Auxiliary from '../../hoc/Auxiliary/Auxiliary';
+import axios from 'axios';
 
 function createOptionControl(number) {
 
@@ -37,15 +38,62 @@ class QuizCreator extends Component {
 		formControls: createFormControls()
 	}
 
-	submitHandler(event) {
+	submitHandler = (event) => {     //   <---- we have a mistake over HERE 
 		event.preventDefault()
-	}
-
-	addQuestionHandler = () => {
 
 	}
 
-	createTestHandler = () => {
+	addQuestionHandler = (event) => {
+		event.preventDefault()
+
+		const quiz = [...this.state.quiz]
+		const index = quiz.length + 1
+
+		const { question, option1, option2, option3, option4 } = this.state.formControls
+
+		const questionItem = {
+			question: question.value,
+			id: index,
+			rightAnswerId: this.state.rightAnswerId,
+			answers: [
+				{ text: option1.value, id: option1.id },
+				{ text: option2.value, id: option2.id },
+				{ text: option3.value, id: option3.id },
+				{ text: option4.value, id: option4.id }
+			]
+		}
+
+		quiz.push(questionItem)
+
+		this.setState({
+			quiz,
+			isFormValid: false,
+			rightAnswerId: 1,
+			formControls: createFormControls()
+		})
+	}
+
+	createQuizHandler = async (event) => {
+		event.preventDefault()
+		try {
+			await axios.post('https://react-quiz-7125e-default-rtdb.firebaseio.com/quizes.json', this.state.quiz)
+
+			this.setState({
+				quiz: [],
+				isFormValid: false,
+				rightAnswerId: 1,
+				formControls: createFormControls()
+			})
+
+		} catch (e) {
+			console.log(e)
+		}
+		/* axios.post('https://react-quiz-7125e-default-rtdb.firebaseio.com/quizes.json', this.state.quiz)
+			.then(response => {
+				console.log(response)
+			}).catch(error => {
+				console.log(error)
+			}) */
 
 	}
 
@@ -119,15 +167,19 @@ class QuizCreator extends Component {
 						<Button
 							type="primary"
 							onClick={this.addQuestionHandler}
+							disabled={!this.state.isFormValid}
 						>
 							Add question
 						</Button>
+
 						<Button
 							type="success"
-							onClick={this.createTestHandler}
+							onClick={this.createQuizHandler}
+							disabled={this.state.quiz.length === 0}
 						>
 							Create test
 						</Button>
+
 					</form>
 				</div>
 			</div>
