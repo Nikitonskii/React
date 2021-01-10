@@ -6,6 +6,8 @@ import { createControl, validate, validateForm } from '../../form/formFramework'
 import Input from '../../components/UI/Input/Input';
 import Auxiliary from '../../hoc/Auxiliary/Auxiliary';
 import axios from 'axios';
+import { connect } from 'react-redux';
+import { finishCreateQuiz, createQuizQuestion } from '../../store/actions/create';
 
 function createOptionControl(number) {
 
@@ -32,28 +34,23 @@ function createFormControls() {
 class QuizCreator extends Component {
 
 	state = {
-		quiz: [],
 		isFormValid: false,
 		rightAnswerId: 1,
 		formControls: createFormControls()
 	}
 
-	submitHandler = (event) => {     //   <---- we have a mistake over HERE 
+	submitHandler = (event) => {
 		event.preventDefault()
-
 	}
 
 	addQuestionHandler = (event) => {
 		event.preventDefault()
 
-		const quiz = [...this.state.quiz]
-		const index = quiz.length + 1
-
 		const { question, option1, option2, option3, option4 } = this.state.formControls
 
 		const questionItem = {
 			question: question.value,
-			id: index,
+			id: this.props.length + 1,
 			rightAnswerId: this.state.rightAnswerId,
 			answers: [
 				{ text: option1.value, id: option1.id },
@@ -63,38 +60,33 @@ class QuizCreator extends Component {
 			]
 		}
 
-		quiz.push(questionItem)
+		this.props.createQuizQuestion(questionItem)
 
 		this.setState({
-			quiz,
 			isFormValid: false,
 			rightAnswerId: 1,
 			formControls: createFormControls()
 		})
 	}
 
-	createQuizHandler = async (event) => {
+	createQuizHandler = (event) => {
 		event.preventDefault()
-		try {
-			await axios.post('https://react-quiz-7125e-default-rtdb.firebaseio.com/quizes.json', this.state.quiz)
 
-			this.setState({
-				quiz: [],
-				isFormValid: false,
-				rightAnswerId: 1,
-				formControls: createFormControls()
-			})
+		axios.post('/quizes.json', this.state.quiz)
 
-		} catch (e) {
-			console.log(e)
-		}
+		this.setState({
+			quiz: [],
+			isFormValid: false,
+			rightAnswerId: 1,
+			formControls: createFormControls()
+		})
+		this.props.finishCreateQuiz()
 		/* axios.post('https://react-quiz-7125e-default-rtdb.firebaseio.com/quizes.json', this.state.quiz)
 			.then(response => {
 				console.log(response)
 			}).catch(error => {
 				console.log(error)
 			}) */
-
 	}
 
 	onChangeHandler = (value, controlName) => {
@@ -175,7 +167,7 @@ class QuizCreator extends Component {
 						<Button
 							type="success"
 							onClick={this.createQuizHandler}
-							disabled={this.state.quiz.length === 0}
+							disabled={this.props.quiz.length === 0}
 						>
 							Create test
 						</Button>
@@ -187,4 +179,17 @@ class QuizCreator extends Component {
 	}
 }
 
-export default QuizCreator
+function mapStateToProps(state) {
+	return {
+		quiz: state.create.quiz
+	}
+}
+
+function mapDispatchToProps(dispach) {
+	return {
+		createQuizQuestion: item => dispach(createQuizQuestion(item)),
+		finishCreateQuiz: () => dispach(finishCreateQuiz())
+	}
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(QuizCreator)
